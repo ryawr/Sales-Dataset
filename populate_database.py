@@ -24,7 +24,6 @@ DATABASE_URL = generate_url()
 from psycopg2 import Error
 
 def create_connection(db_file, delete_db=False):
-    import os
     if delete_db and os.path.exists(db_file):
         os.remove(db_file)
 

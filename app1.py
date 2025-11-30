@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 import psycopg2
 import bcrypt
+from google import genai
 
 # --- Configuration and Initialization ---
 
@@ -182,7 +183,7 @@ def execute_sql(sql):
 
 
 # --- LLM connection --- # 
-from google import genai
+
 
 def generate_sql_query_llm(prompt):
 
