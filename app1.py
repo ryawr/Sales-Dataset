@@ -55,7 +55,7 @@ if 'logged_in' not in st.session_state:
 
 # -- Login Screen -- #
 
-HASHED_PASSWORD = os.environ.get("HASHED_PASSWORD")
+HASHED_PASSWORD = st.secrets["HASHED_PASSWORD"]
 
 def login_screen():
     """Display login screen and authenticate user."""
@@ -157,10 +157,10 @@ DATABASE_SCHEMA = """
 load_dotenv()
 
 def generate_url():
-    DATABASE_USERNAME = os.environ.get("DATABASE_USERNAME") 
-    DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD") 
-    DATABASE_SERVER = os.environ.get("DATABASE_SERVER") 
-    DATABASE_NAME = os.environ.get("DATABASE_NAME") 
+    DATABASE_USERNAME = st.secrets["DATABASE_USERNAME"]
+    DATABASE_PASSWORD = st.secrets["DATABASE_PASSWORD"] 
+    DATABASE_SERVER = st.secrets["DATABASE_SERVER"] 
+    DATABASE_NAME = st.secrets["DATABASE_NAME"] 
 
     return f"postgresql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_SERVER}/{DATABASE_NAME}"
 
@@ -187,7 +187,7 @@ def execute_sql(sql):
 
 def generate_sql_query_llm(prompt):
 
-    MY_API_KEY = os.environ.get("GEMINI_KEY") 
+    MY_API_KEY = st.secrets["GEMINI_KEY"]
     client = genai.Client(api_key=MY_API_KEY)
     response = client.models.generate_content(
         model="gemini-2.0-flash-lite",

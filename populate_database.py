@@ -6,6 +6,7 @@ from psycopg2 import extras
 import csv
 from pathlib import Path
 import time
+import datetime
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -395,7 +396,7 @@ def step11_create_orderdetail_table(data_filename, normalized_database_filename,
 
     ## Extracting Data ##
 
-    import datetime
+    
     prd_dict = step10_create_product_to_productid_dictionary(normalized_database_filename)
     customer_dict = step6_create_customer_to_customerid_dictionary(normalized_database_filename)
     row_count_total = 0

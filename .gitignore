@@ -41,3 +41,4 @@ htmlcov/
 .env
 .ssh
 .ssh.pub
+.streamlit
