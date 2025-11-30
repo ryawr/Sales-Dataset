@@ -1,0 +1,41 @@
+# Python
+# Byte-code files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Distribution / packaging
+.Python
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+.env/
+
+# IDE/editor-specific files
+.idea/  # popular with PyCharm
+.vscode/ # popular with VS Code
+*.swp   # vim swap files
+
+# Miscellaneous
+.pytest_cache/
+.ruff_cache/
+pip-log.txt
+pip-delete-this-arg.txt
+htmlcov/
+.tox/
+.mypy_cache/
+
+# Sensitive files (e.g., environment variables)
+.env
+.flaskenv
+
+
+.env
