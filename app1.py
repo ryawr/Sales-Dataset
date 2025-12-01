@@ -1,4 +1,3 @@
-# pip install google-genai
 
 import streamlit as st
 import time
@@ -10,21 +9,15 @@ import bcrypt
 from google import genai
 import re
 
-# --- Configuration and Initialization ---
+# --- Configuration and Initialization --- #
 
-# Set page configuration for a wider, cleaner layout
+# Page configuration for a wider, cleaner layout
 st.set_page_config(
     layout="wide"
 )
 
-# Database correction - done
-# SQL query formatting - done
-# typecast error - sorted
-# Streamlit code efficiency (Query history)
-# Sidebar content - done
-# update populate_db.py - data insertion, os.environ - done
 
-# Initialize session state for history and current input if they don't exist
+# Initialize session state for history and current input
 if 'history' not in st.session_state:
     st.session_state.history = []
 if 'user_input_key' not in st.session_state:
@@ -171,7 +164,6 @@ def execute_sql(sql):
 
 # --- LLM connection --- # 
 
-
 def generate_sql_query_llm(prompt):
 
     MY_API_KEY = st.secrets["GEMINI_KEY"]
@@ -199,7 +191,7 @@ def sql_extraction(text_block):
 # --- Button Handlers ---
 
 def handle_generate_sql():
-    """Handles the click event for the 'Generate SQL' button."""
+    """Handles click of 'Generate SQL' button."""
     prompt = st.session_state.user_input_key
     
     # Reset execution messages and results when a new generation starts
@@ -229,17 +221,15 @@ def handle_generate_sql():
             result = generate_sql_query_llm(prompt_formatted)
         
         result_formatted = sql_extraction(result)
-        # Add the new result to the history
+        
         st.session_state.history.append({
             "prompt" : st.session_state.user_input_key,
             "sql" : result_formatted
         })
         
-        # Clear the input box after submission
         st.session_state.user_input_key = ""
 
 def handle_clear_history():
-    """Clears the entire conversation history and execution messages."""
     st.session_state.history = []
     st.session_state.user_input_key = ""
     st.session_state.execution_message = None
@@ -252,12 +242,8 @@ def load_example(example_text):
 
 
 def handle_run_query(latest_index):
-    """
-    Simulates running the query against a database and displays results.
-    In a real app, this would use `psycopg2` or similar to connect to Postgres.
-    """
+    """Run the query against the database and displays results."""
     
-    # Retrieve the potentially edited SQL from session state
     sql_to_execute = st.session_state.get(f'editable_sql_{latest_index}')
     
     # Clear previous execution results/messages
@@ -272,39 +258,32 @@ def handle_run_query(latest_index):
     with st.spinner('Executing query against database...'):
         time.sleep(2) # Simulate execution time
         
-        # For demonstration: Use the stored query type to generate simulated data
-        # query_type = st.session_state.history[latest_index]['type']
-        
         try:
             results_df = execute_sql(sql_to_execute)
-            # results_df = simulate_query_execution(query_type)
             
-            # Store the simulated DataFrame in session state
             st.session_state.query_results_df = results_df
             
-            # Set success message
             st.session_state.execution_message = (
                 f"✅ Query returned {len(results_df)} rows successfully at {time.strftime('%H:%M:%S')}!"
             )
             
         except Exception as e:
-            # Placeholder for real database errors
             st.session_state.execution_error = f"❌ Database Error: Could not execute query. {e}"
 
 
 # --- Sidebar Content ---
 
 def render_sidebar():
-    """Renders the sidebar with example questions and 'How it works'."""
+    """Renders the sidebar"""
     st.sidebar.markdown(
         """
-        <div style="padding-top: 10px;">
-            <h3><span style='font-size: 1.5em;'>💡</span> Example Questions</h3>
-            <p style="font-size: 0.9em; margin-top: 5px;">
+        <div>
+            <h3>💡 Example Questions</h3>
+            <p>
                 Try asking questions like:
             </p>
         </div>
-        """, 
+        """,
         unsafe_allow_html=True
     )
     
@@ -320,7 +299,7 @@ def render_sidebar():
     st.sidebar.button(
         "List of all the countries with total order value greater than 100000 dollars.", 
         on_click=load_example, 
-        args=["SList of all the countries with total order value greater than 100000 dollars."], 
+        args=["List of all the countries with total order value greater than 100000 dollars."], 
         key="ex_country"
     )
 
@@ -342,12 +321,12 @@ def render_sidebar():
     st.sidebar.markdown("---")
     st.sidebar.markdown(
         """
-        <div style="padding-top: 10px;">
+        <div>
             <h3 style="color: #4CAF50;">⚙️ How it works</h3>
-            <ol style="font-size: 0.9em; margin-left: -20px; padding-left: 20px;">
+            <ol >
                 <li>Enter your question in plain English</li>
                 <li>AI generates SQL query</li>
-                <li>Review and click 'Run Query' to execute against your connected database (in a real app)</li>
+                <li>Review and click 'Run Query' to execute against your connected database</li>
             </ol>
         </div>
         """,
@@ -364,7 +343,6 @@ def render_sidebar():
 # --- Main Application Logic ---
 
 def main():
-    """The main function to run the Streamlit app."""
 
     require_login()
     
@@ -374,7 +352,7 @@ def main():
     # 2. Main Title
     st.markdown(
         """
-        <div style="text-align: center; padding: 20px 0;">
+        <div style="text-align: center;">
             <h1 style="color: #FF6A4D;">🤖 AI-Powered SQL Query Assistant</h1>
             <p style="font-size: 1.1em; color: #4b5563;">
                 Ask questions in natural language, and I will generate SQL queries for you to review and run!
@@ -425,13 +403,11 @@ def main():
 
         # --- Display Latest Query ---
         
-        # Display the question in a visually distinct box
-        
-        # st.write(latest_item)
+        # Prompt display
         st.markdown(
             f"""
-            <div style="background-color: #36454F; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                <p style="margin: 0; font-weight: bold;">Question: {latest_item["prompt"]}</p>
+            <div style="background-color: #36454F; padding: 10px; border-radius: 6px;">
+                <p>Question: {latest_item["prompt"]}</p>
             </div>
             """, 
             unsafe_allow_html=True
@@ -442,8 +418,6 @@ def main():
         # Editable SQL Area for the latest item
         sql_key = f"editable_sql_{latest_index}"
         
-        # Initialize the state for the latest SQL if not already set (e.g., after generation)
-        # We only want to initialize it once from the generated SQL, subsequent changes are user edits
         if sql_key not in st.session_state or st.session_state[sql_key] == "": 
             st.session_state[sql_key] = latest_item["sql"]
             
@@ -464,23 +438,22 @@ def main():
             type="primary"
         )
         
-        # 6. Query Results Section (Updated for Robust Display)
+        # 6. Query Results Section
         if st.session_state.get('execution_message') or st.session_state.get('execution_error'):
             
             st.markdown("---")
             st.subheader("📊 Query Results")
             
-            # Use a container to ensure the results block is rendered reliably
             results_container = st.container() 
             
             if st.session_state.get('execution_message'):
                 with results_container:
+                    
                     # Display success message
                     st.success(st.session_state.execution_message)
                     
                     # Display the simulated DataFrame result
                     if st.session_state.query_results_df is not None:
-                        # Use Streamlit's data visualizer for the output
                         st.dataframe(st.session_state.query_results_df, use_container_width=True)
                 
             if st.session_state.get('execution_error'):
@@ -493,7 +466,6 @@ def main():
         # --- Display Older History Items ---
         if len(st.session_state.history) > 1:
             st.subheader("Previous Queries")
-            # Loop for all items EXCEPT the latest one
             for i in range(len(st.session_state.history) - 2, -1, -1):
                 item = st.session_state.history[i]
                 
