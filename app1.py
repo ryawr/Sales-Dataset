@@ -8,34 +8,21 @@ import os
 import psycopg2
 import bcrypt
 from google import genai
+import re
 
 # --- Configuration and Initialization ---
 
 # Set page configuration for a wider, cleaner layout
 st.set_page_config(
-    page_title="AI SQL Query Assistant",
-    page_icon="🤖",
     layout="wide"
 )
 
-# Database connection
-# .env
-# fn database connection 
-# fn execute sql
-
-# LLM connection
-# .env
-# client creation
-# easy output
-# sql formatting - role formatting
-# sql output
-
-# Database correction
-# SQL query formatting
-# typecast error
+# Database correction - done
+# SQL query formatting - done
+# typecast error - sorted
 # Streamlit code efficiency (Query history)
-# Sidebar content
-# update populate_db.py - data insertion, os.environ
+# Sidebar content - done
+# update populate_db.py - data insertion, os.environ - done
 
 # Initialize session state for history and current input if they don't exist
 if 'history' not in st.session_state:
@@ -197,6 +184,18 @@ def generate_sql_query_llm(prompt):
     return response.text
 
 
+def sql_extraction(text_block):
+    pattern = r"```sql\n([\s\S]*?)\n```"
+
+    match = re.search(pattern, text_block)
+
+    if match:
+        sql_query = match.group(1).strip()
+        return sql_query
+    else:
+        print("SQL block not found in the text.")
+
+
 # --- Button Handlers ---
 
 def handle_generate_sql():
@@ -229,8 +228,12 @@ def handle_generate_sql():
         with st.spinner('Generating SQL query...'):
             result = generate_sql_query_llm(prompt_formatted)
         
+        result_formatted = sql_extraction(result)
         # Add the new result to the history
-        st.session_state.history.append(result)
+        st.session_state.history.append({
+            "prompt" : st.session_state.user_input_key,
+            "sql" : result_formatted
+        })
         
         # Clear the input box after submission
         st.session_state.user_input_key = ""
@@ -309,30 +312,30 @@ def render_sidebar():
     
     st.sidebar.markdown("**Demographics:**")
     st.sidebar.button(
-        "How many patients do we have by gender?", 
+        "Find the total value by region. Total is defined as multiplication of product price and ordered quantity.", 
         on_click=load_example, 
-        args=["How many patients do we have by gender?"], 
-        key="ex_gender"
+        args=["Find the total value by region. Total is defined as multiplication of product price and ordered quantity."], 
+        key="ex_region"
     )
     st.sidebar.button(
-        "Show all patients older than 75.", 
+        "List of all the countries with total order value greater than 100000 dollars.", 
         on_click=load_example, 
-        args=["Show all patients older than 75."], 
-        key="ex_age"
+        args=["SList of all the countries with total order value greater than 100000 dollars."], 
+        key="ex_country"
     )
 
-    st.sidebar.markdown("**Admissions:**")
+    st.sidebar.markdown("**Statistics**")
     st.sidebar.button(
-        "What is the average length of stay?", 
+        "What is the average order value?", 
         on_click=load_example, 
-        args=["What is the average length of stay?"], 
-        key="ex_admit"
+        args=["What is the average order value?"], 
+        key="ex_average_order"
     )
     st.sidebar.button(
-        "List the top 5 most common diagnoses.", 
+        "List the top 5 most ordered productnames.", 
         on_click=load_example, 
-        args=["List the top 5 most common diagnoses."], 
-        key="ex_diag"
+        args=["List the top 5 most ordered productnames."], 
+        key="ex_common_product"
     )
 
     # Add "How it works" section
@@ -372,7 +375,7 @@ def main():
     st.markdown(
         """
         <div style="text-align: center; padding: 20px 0;">
-            <h1 style="color: #1f2937;">🤖 AI-Powered SQL Query Assistant</h1>
+            <h1 style="color: #FF6A4D;">🤖 AI-Powered SQL Query Assistant</h1>
             <p style="font-size: 1.1em; color: #4b5563;">
                 Ask questions in natural language, and I will generate SQL queries for you to review and run!
             </p>
@@ -389,7 +392,7 @@ def main():
         height=100,
         key="user_input_key", # Key for session state management
         label_visibility="collapsed",
-        placeholder="e.g., How many people are older than 60"
+        placeholder="e.g., what is the average order value?"
     )
 
     # 4. Action Buttons
@@ -424,15 +427,15 @@ def main():
         
         # Display the question in a visually distinct box
         
-        st.write(latest_item)
-        # st.markdown(
-        #     f"""
-        #     <div style="background-color: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-        #         <p style="margin: 0; font-weight: bold;">Question: {latest_item}</p>
-        #     </div>
-        #     """, 
-        #     unsafe_allow_html=True
-        # )
+        # st.write(latest_item)
+        st.markdown(
+            f"""
+            <div style="background-color: #36454F; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                <p style="margin: 0; font-weight: bold;">Question: {latest_item["prompt"]}</p>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
 
         st.markdown("Review and edit the SQL query if needed:")
         
@@ -442,13 +445,13 @@ def main():
         # Initialize the state for the latest SQL if not already set (e.g., after generation)
         # We only want to initialize it once from the generated SQL, subsequent changes are user edits
         if sql_key not in st.session_state or st.session_state[sql_key] == "": 
-            st.session_state[sql_key] = latest_item
+            st.session_state[sql_key] = latest_item["sql"]
             
         st.text_area(
             label="SQL Query", 
             value=st.session_state[sql_key], 
             height=150, 
-            key=sql_key, 
+            key=sql_key,
             label_visibility="collapsed"
         )
         
